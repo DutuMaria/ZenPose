@@ -4,9 +4,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -189,47 +188,28 @@ fun DifficultyFilterCircles(
     ) {
         items.forEach { item ->
             val isSelected = item.level == selected
-
-            val size by animateDpAsState(
-                targetValue = if (isSelected) 60.dp else 52.dp,
-                label = "sizeAnim"
-            )
-            val borderWidth by animateDpAsState(
-                targetValue = if (isSelected) 2.dp else 1.dp,
-                label = "borderAnim"
-            )
-            val chipBg by animateColorAsState(
-                targetValue = item.color.copy(alpha = if (isSelected) 0.25f else 0.12f),
-                label = "bgAnim"
-            )
-            val borderColor by animateColorAsState(
-                targetValue = if (isSelected)
-                    MaterialTheme.colorScheme.primary
-                else
-                    item.color.copy(alpha = 0.6f),
-                label = "borderColorAnim"
-            )
+            val borderColor =
+                if (isSelected) MaterialTheme.colorScheme.primary else item.color.copy(alpha = 0.6f)
+            val bgColor = if (isSelected) item.color.copy(alpha = 0.16f) else Color.Transparent
 
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.widthIn(min = 64.dp)
             ) {
-                Surface(
-                    shape = CircleShape,
-                    color = chipBg,
-                    tonalElevation = if (isSelected) 6.dp else 0.dp,
-                    shadowElevation = if (isSelected) 2.dp else 0.dp,
+                Box(
                     modifier = Modifier
-                        .size(size)
-                        .border(borderWidth, borderColor, CircleShape)
-                        .clickable(
-                            role = Role.Button,
-                            onClick = { onSelect(item.level) }
+                        .size(52.dp)
+                        .clip(CircleShape)
+                        .background(bgColor, CircleShape)
+                        .border(
+                            width = if (isSelected) 2.dp else 1.dp,
+                            color = borderColor,
+                            shape = CircleShape
                         )
+                        .clickable(role = Role.Button) { onSelect(item.level) },
+                    contentAlignment = Alignment.Center
                 ) {
-                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text(text = item.emoji, fontSize = if (isSelected) 24.sp else 22.sp)
-                    }
+                    Text(text = item.emoji, fontSize = 22.sp)
                 }
 
                 Spacer(Modifier.height(6.dp))
