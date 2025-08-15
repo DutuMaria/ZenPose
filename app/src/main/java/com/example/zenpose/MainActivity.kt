@@ -16,13 +16,21 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -62,34 +70,89 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun YogaPosesScreen(poses: List<YogaPose>, modifier: Modifier) {
     var selectedDifficulty by remember { mutableStateOf(DifficultyLevel.AllLevels) }
+    var query by remember { mutableStateOf("") }
 
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        ZenSearchBar(
+            query = query,
+            onQueryChange = { query = it },
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 10.dp)
+        )
+
+        Spacer(modifier = Modifier.height(14.dp))
+
         PoseDifficultySingleChoiceSegmentedButton(
             selected = selectedDifficulty,
             onSelect = { selectedDifficulty = it },
-            modifier = Modifier.padding(8.dp)
+            modifier = Modifier.padding(horizontal = 8.dp)
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
-        val filteredPoses = remember(poses, selectedDifficulty) {
-            if (selectedDifficulty == DifficultyLevel.AllLevels) poses
-            else poses.filter { it.difficulty == selectedDifficulty }
+        val filteredPoses = remember(poses, selectedDifficulty, query) {
+            poses.asSequence()
+                .filter { selectedDifficulty == DifficultyLevel.AllLevels || it.difficulty == selectedDifficulty }
+                .filter {
+                    val q = query.trim()
+                    q.isEmpty() || it.name.contains(q, true) || it.description.contains(q, true)
+                }
+                .toList()
         }
 
         LazyColumn {
-            items(
-                items = filteredPoses,
-                key = { it.day }
-            ) { pose ->
+            items(items = filteredPoses, key = { it.day }) { pose ->
                 YogaPoseCard(pose, Modifier.padding(8.dp))
             }
         }
     }
 }
+
+@Composable
+fun ZenSearchBar(
+    query: String,
+    onQueryChange: (String) -> Unit,
+    modifier: Modifier,
+    placeholder: String = "Caută o poziție…",
+) {
+    Surface(
+        shape = RoundedCornerShape(28.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        tonalElevation = 6.dp,
+        shadowElevation = 2.dp,
+        modifier = modifier
+            .fillMaxWidth()
+    ) {
+        TextField(
+            value = query,
+            onValueChange = onQueryChange,
+            singleLine = true,
+            placeholder = { Text(placeholder) },
+            leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
+            trailingIcon = {
+                if (query.isNotEmpty()) {
+                    IconButton(onClick = { onQueryChange("") }) {
+                        Icon(Icons.Filled.Close, contentDescription = "Clear")
+                    }
+                }
+            },
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = Color.Transparent,
+                unfocusedContainerColor = Color.Transparent,
+                disabledContainerColor = Color.Transparent,
+                errorContainerColor = Color.Transparent,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+                disabledIndicatorColor = Color.Transparent,
+                errorIndicatorColor = Color.Transparent
+            ),
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
+}
+
 
 @Composable
 fun PoseDifficultySingleChoiceSegmentedButton(
