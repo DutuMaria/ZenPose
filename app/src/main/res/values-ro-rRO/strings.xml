@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">Zen Pose</string>
+    <string name="app_title">30 Days Of Yoga Poses</string>
+
+    <!-- Search -->
+    <string name="search_placeholder">Caută o poziție…</string>
+    <string name="cd_search">Caută</string>
+    <string name="cd_clear_search">Șterge căutarea</string>
+
+    <!-- Difficulty -->
+    <string name="all_levels">Toate nivelurile</string>
+    <string name="beginner">Începător</string>
+    <string name="intermediate">Intermediar</string>
+    <string name="advanced">Avansat</string>
+    <string name="cd_filter_level">Filtrează: %1$s</string>
+
+    <!-- Theme toggle -->
+    <string name="cd_toggle_theme">Schimbă tema</string>
+
+    <!-- Cards -->
+    <string name="day_prefix">Ziua %1$d: %2$s</string>
+    <string name="cd_pose_image">Imagine cu %1$s</string>
+</resources>

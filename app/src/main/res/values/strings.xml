@@ -1,3 +1,23 @@
 <resources>
-    <string name="app_name">ZenPose</string>
+    <string name="app_name">Zen Pose</string>
+    <string name="app_title">30 Days Of Yoga Poses</string>
+
+    <!-- Search -->
+    <string name="search_placeholder">Search for a pose…</string>
+    <string name="cd_search">Search</string>
+    <string name="cd_clear_search">Clear search</string>
+
+    <!-- Difficulty -->
+    <string name="all_levels">All levels</string>
+    <string name="beginner">Beginner</string>
+    <string name="intermediate">Intermediate</string>
+    <string name="advanced">Advanced</string>
+    <string name="cd_filter_level">Filter: %1$s</string>
+
+    <!-- Theme toggle -->
+    <string name="cd_toggle_theme">Toggle theme</string>
+
+    <!-- Cards -->
+    <string name="day_prefix">Day %1$d: %2$s</string>
+    <string name="cd_pose_image">Image of %1$s</string>
 </resources>

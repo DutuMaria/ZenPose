@@ -55,6 +55,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -98,7 +99,7 @@ fun ZenPoseAppBar(isLightTheme: Boolean, onThemeToggle: () -> Unit) {
     TopAppBar(
         title = {
             Text(
-                "30 Days Of Yoga Poses",
+                text = stringResource(R.string.app_title),
                 style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                 color = MaterialTheme.colorScheme.onPrimary
             )
@@ -107,7 +108,7 @@ fun ZenPoseAppBar(isLightTheme: Boolean, onThemeToggle: () -> Unit) {
             IconButton(onClick = onThemeToggle) {
                 Icon(
                     imageVector = if (isLightTheme) Icons.Filled.DarkMode else Icons.Filled.LightMode,
-                    contentDescription = "Toggle theme",
+                    contentDescription = stringResource(R.string.cd_toggle_theme),
                     tint = MaterialTheme.colorScheme.onPrimary
                 )
             }
@@ -174,7 +175,6 @@ fun ZenSearchBar(
     query: String,
     onQueryChange: (String) -> Unit,
     modifier: Modifier,
-    placeholder: String = "Caută o poziție…",
 ) {
     Surface(
         shape = RoundedCornerShape(28.dp),
@@ -188,12 +188,20 @@ fun ZenSearchBar(
             value = query,
             onValueChange = onQueryChange,
             singleLine = true,
-            placeholder = { Text(placeholder) },
-            leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
+            placeholder = { Text(stringResource(R.string.search_placeholder)) },
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Filled.Search,
+                    contentDescription = stringResource(R.string.cd_search)
+                )
+            },
             trailingIcon = {
                 if (query.isNotEmpty()) {
                     IconButton(onClick = { onQueryChange("") }) {
-                        Icon(Icons.Filled.Close, contentDescription = "Clear")
+                        Icon(
+                            imageVector = Icons.Filled.Close,
+                            contentDescription = stringResource(R.string.cd_clear_search)
+                        )
                     }
                 }
             },
@@ -226,10 +234,10 @@ fun DifficultyFilterCircles(
     )
 
     val items = listOf(
-        Item(DifficultyLevel.AllLevels, "✨", "All levels", Color(0xFF90A4AE)),
-        Item(DifficultyLevel.Beginner, "🌱", "Beginner", Color(0xFF81C784)),
-        Item(DifficultyLevel.Intermediate, "🔆", "Intermediate", Color(0xFFFFB74D)),
-        Item(DifficultyLevel.Advanced, "🔥", "Advanced", Color(0xFFE57373))
+        Item(DifficultyLevel.AllLevels, "✨", stringResource(R.string.all_levels), Color(0xFF90A4AE)),
+        Item(DifficultyLevel.Beginner, "🌱", stringResource(R.string.beginner), Color(0xFF81C784)),
+        Item(DifficultyLevel.Intermediate, "🔆", stringResource(R.string.intermediate), Color(0xFFFFB74D)),
+        Item(DifficultyLevel.Advanced, "🔥", stringResource(R.string.advanced), Color(0xFFE57373))
     )
 
     Row(
@@ -290,7 +298,6 @@ fun YogaPoseCard(pose: YogaPose, modifier: Modifier) {
             .height(125.dp)
     ) {
         Row(
-//            modifier = Modifier.height(IntrinsicSize.Min), // Înălțimea rândului va fi dictată de cel mai mare element (imaginea)
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(
@@ -299,7 +306,7 @@ fun YogaPoseCard(pose: YogaPose, modifier: Modifier) {
                     .padding(16.dp)
             ) {
                 Text(
-                    "Day ${pose.day}: ${pose.name}",
+                    text = stringResource(R.string.day_prefix, pose.day, pose.name),
                     style = MaterialTheme.typography.titleMedium
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -314,7 +321,7 @@ fun YogaPoseCard(pose: YogaPose, modifier: Modifier) {
 
             Image(
                 painter = painterResource(id = pose.imageResId),
-                contentDescription = pose.name,
+                contentDescription = stringResource(R.string.cd_pose_image, pose.name),
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxHeight()
@@ -327,14 +334,12 @@ fun YogaPoseCard(pose: YogaPose, modifier: Modifier) {
 
 @Composable
 fun DifficultyIcon(level: DifficultyLevel) {
-    val (icon, color) = when (level) {
-        DifficultyLevel.Beginner -> "🌱" to Color(0xFF81C784)
-        DifficultyLevel.Intermediate -> "🔆" to Color(0xFFFFB74D)
-        DifficultyLevel.Advanced -> "🔥" to Color(0xFFE57373)
-        DifficultyLevel.AllLevels -> "✨" to Color(0xFF90A4AE)
+    val (icon, color, label) = when (level) {
+        DifficultyLevel.Beginner     -> Triple("🌱", Color(0xFF81C784), stringResource(R.string.beginner))
+        DifficultyLevel.Intermediate -> Triple("🔆", Color(0xFFFFB74D), stringResource(R.string.intermediate))
+        DifficultyLevel.Advanced     -> Triple("🔥", Color(0xFFE57373), stringResource(R.string.advanced))
+        DifficultyLevel.AllLevels    -> Triple("✨", Color(0xFF90A4AE), stringResource(R.string.all_levels))
     }
-
-    val label = if (level == DifficultyLevel.AllLevels) "All levels" else level.name
 
     Text(
         text = "$icon $label",
