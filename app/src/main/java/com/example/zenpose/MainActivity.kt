@@ -25,7 +25,7 @@ import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -61,23 +61,42 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun YogaPosesScreen(poses: List<YogaPose>, modifier: Modifier) {
+    var selectedDifficulty by remember { mutableStateOf(DifficultyLevel.AllLevels) }
+
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        PoseDifficultySingleChoiceSegmentedButton(modifier.padding(8.dp))
-        Spacer(modifier.height(16.dp))
+        PoseDifficultySingleChoiceSegmentedButton(
+            selected = selectedDifficulty,
+            onSelect = { selectedDifficulty = it },
+            modifier = Modifier.padding(8.dp)
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        val filteredPoses = remember(poses, selectedDifficulty) {
+            if (selectedDifficulty == DifficultyLevel.AllLevels) poses
+            else poses.filter { it.difficulty == selectedDifficulty }
+        }
+
         LazyColumn {
-            items(poses) { pose ->
-                YogaPoseCard(pose, modifier.padding(8.dp))
+            items(
+                items = filteredPoses,
+                key = { it.day }
+            ) { pose ->
+                YogaPoseCard(pose, Modifier.padding(8.dp))
             }
         }
     }
 }
 
 @Composable
-fun PoseDifficultySingleChoiceSegmentedButton(modifier: Modifier = Modifier) {
-    var selectedIndex by remember { mutableIntStateOf(0) }
+fun PoseDifficultySingleChoiceSegmentedButton(
+    selected: DifficultyLevel,
+    onSelect: (DifficultyLevel) -> Unit,
+    modifier: Modifier = Modifier
+) {
     val options = listOf(
         DifficultyLevel.AllLevels,
         DifficultyLevel.Beginner,
@@ -85,11 +104,13 @@ fun PoseDifficultySingleChoiceSegmentedButton(modifier: Modifier = Modifier) {
         DifficultyLevel.Advanced
     )
 
+    val selectedIndex = options.indexOf(selected)
+
     SingleChoiceSegmentedButtonRow(modifier = modifier) {
-        options.forEachIndexed { index, label ->
-            val displayName = when (label) {
+        options.forEachIndexed { index, option ->
+            val displayName = when (option) {
                 DifficultyLevel.AllLevels -> "All levels"
-                else -> label.name
+                else -> option.name
             }
 
             SegmentedButton(
@@ -97,7 +118,7 @@ fun PoseDifficultySingleChoiceSegmentedButton(modifier: Modifier = Modifier) {
                     index = index,
                     count = options.size
                 ),
-                onClick = { selectedIndex = index },
+                onClick = { onSelect(option) },
                 selected = index == selectedIndex,
                 icon = {},
                 label = { Text(displayName, fontSize = 12.sp) }
@@ -150,23 +171,23 @@ fun YogaPoseCard(pose: YogaPose, modifier: Modifier) {
     }
 }
 
-
 @Composable
 fun DifficultyIcon(level: DifficultyLevel) {
     val (icon, color) = when (level) {
         DifficultyLevel.Beginner -> "🌱" to Color(0xFF81C784)
         DifficultyLevel.Intermediate -> "🔆" to Color(0xFFFFB74D)
         DifficultyLevel.Advanced -> "🔥" to Color(0xFFE57373)
-        DifficultyLevel.AllLevels -> TODO()
+        DifficultyLevel.AllLevels -> "✨" to Color(0xFF90A4AE)
     }
 
+    val label = if (level == DifficultyLevel.AllLevels) "All levels" else level.name
+
     Text(
-        text = "$icon ${level.name}",
+        text = "$icon $label",
         color = color,
         style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium)
     )
 }
-
 
 @Preview(showBackground = true)
 @Composable
