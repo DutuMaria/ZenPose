@@ -85,9 +85,13 @@ fun PoseDifficultySingleChoiceSegmentedButton(modifier: Modifier = Modifier) {
         DifficultyLevel.Advanced
     )
 
-
     SingleChoiceSegmentedButtonRow(modifier = modifier) {
         options.forEachIndexed { index, label ->
+            val displayName = when (label) {
+                DifficultyLevel.AllLevels -> "All levels"
+                else -> label.name
+            }
+
             SegmentedButton(
                 shape = SegmentedButtonDefaults.itemShape(
                     index = index,
@@ -96,7 +100,7 @@ fun PoseDifficultySingleChoiceSegmentedButton(modifier: Modifier = Modifier) {
                 onClick = { selectedIndex = index },
                 selected = index == selectedIndex,
                 icon = {},
-                label = { Text(label.name, fontSize = 12.sp) }
+                label = { Text(displayName, fontSize = 12.sp) }
             )
         }
     }
