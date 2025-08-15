@@ -4,7 +4,13 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,8 +19,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -24,9 +33,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -42,6 +48,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -79,15 +86,15 @@ fun YogaPosesScreen(poses: List<YogaPose>, modifier: Modifier) {
         ZenSearchBar(
             query = query,
             onQueryChange = { query = it },
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 10.dp)
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp)
         )
 
         Spacer(modifier = Modifier.height(14.dp))
 
-        PoseDifficultySingleChoiceSegmentedButton(
+        DifficultyFilterCircles(
             selected = selectedDifficulty,
             onSelect = { selectedDifficulty = it },
-            modifier = Modifier.padding(horizontal = 8.dp)
+            modifier = Modifier.padding(vertical = 4.dp)
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -104,7 +111,7 @@ fun YogaPosesScreen(poses: List<YogaPose>, modifier: Modifier) {
 
         LazyColumn {
             items(items = filteredPoses, key = { it.day }) { pose ->
-                YogaPoseCard(pose, Modifier.padding(8.dp))
+                YogaPoseCard(pose, Modifier.padding(12.dp))
             }
         }
     }
@@ -153,39 +160,90 @@ fun ZenSearchBar(
     }
 }
 
-
 @Composable
-fun PoseDifficultySingleChoiceSegmentedButton(
+fun DifficultyFilterCircles(
     selected: DifficultyLevel,
     onSelect: (DifficultyLevel) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val options = listOf(
-        DifficultyLevel.AllLevels,
-        DifficultyLevel.Beginner,
-        DifficultyLevel.Intermediate,
-        DifficultyLevel.Advanced
+    data class Item(
+        val level: DifficultyLevel,
+        val emoji: String,
+        val label: String,
+        val color: Color
     )
 
-    val selectedIndex = options.indexOf(selected)
+    val items = listOf(
+        Item(DifficultyLevel.AllLevels, "✨", "All levels", Color(0xFF90A4AE)),
+        Item(DifficultyLevel.Beginner, "🌱", "Beginner", Color(0xFF81C784)),
+        Item(DifficultyLevel.Intermediate, "🔆", "Intermediate", Color(0xFFFFB74D)),
+        Item(DifficultyLevel.Advanced, "🔥", "Advanced", Color(0xFFE57373))
+    )
 
-    SingleChoiceSegmentedButtonRow(modifier = modifier) {
-        options.forEachIndexed { index, option ->
-            val displayName = when (option) {
-                DifficultyLevel.AllLevels -> "All levels"
-                else -> option.name
-            }
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        items.forEach { item ->
+            val isSelected = item.level == selected
 
-            SegmentedButton(
-                shape = SegmentedButtonDefaults.itemShape(
-                    index = index,
-                    count = options.size
-                ),
-                onClick = { onSelect(option) },
-                selected = index == selectedIndex,
-                icon = {},
-                label = { Text(displayName, fontSize = 12.sp) }
+            val size by animateDpAsState(
+                targetValue = if (isSelected) 60.dp else 52.dp,
+                label = "sizeAnim"
             )
+            val borderWidth by animateDpAsState(
+                targetValue = if (isSelected) 2.dp else 1.dp,
+                label = "borderAnim"
+            )
+            val chipBg by animateColorAsState(
+                targetValue = item.color.copy(alpha = if (isSelected) 0.25f else 0.12f),
+                label = "bgAnim"
+            )
+            val borderColor by animateColorAsState(
+                targetValue = if (isSelected)
+                    MaterialTheme.colorScheme.primary
+                else
+                    item.color.copy(alpha = 0.6f),
+                label = "borderColorAnim"
+            )
+
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.widthIn(min = 64.dp)
+            ) {
+                Surface(
+                    shape = CircleShape,
+                    color = chipBg,
+                    tonalElevation = if (isSelected) 6.dp else 0.dp,
+                    shadowElevation = if (isSelected) 2.dp else 0.dp,
+                    modifier = Modifier
+                        .size(size)
+                        .border(borderWidth, borderColor, CircleShape)
+                        .clickable(
+                            role = Role.Button,
+                            onClick = { onSelect(item.level) }
+                        )
+                ) {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text(text = item.emoji, fontSize = if (isSelected) 24.sp else 22.sp)
+                    }
+                }
+
+                Spacer(Modifier.height(6.dp))
+
+                Text(
+                    text = item.label,
+                    fontSize = 12.sp,
+                    fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                    color = if (isSelected)
+                        MaterialTheme.colorScheme.onSurface
+                    else
+                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                )
+            }
         }
     }
 }
