@@ -27,9 +27,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.example.zenpose.R
 import com.example.zenpose.data.YogaPose
 
 
@@ -67,7 +69,7 @@ fun CardFront(pose: YogaPose) {
                     .padding(16.dp)
             ) {
                 Text(
-                    "Day ${pose.day}: ${pose.name}",
+                    stringResource(R.string.day_prefix, pose.day, pose.name),
                     style = MaterialTheme.typography.titleMedium
                 )
                 Spacer(modifier = Modifier.height(8.dp))
